@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from .imgkit import IMGKit
-from .config import Config
+from async_imgkit.async_imgkit import AsyncIMGKit
+from async_imgkit.config import Config
 
 
 async def from_url(url,
@@ -23,7 +23,7 @@ async def from_url(url,
     :param cover_first: (optional) if True, cover always precedes TOC
     :return: True when success
     """
-    rtn = await IMGKit.create(url,
+    rtn = await AsyncIMGKit.create(url,
                  'url',
                  options=options,
                  toc=toc, cover=cover,
@@ -53,7 +53,7 @@ async def from_file(filename,
     :param cover_first: (optional) if True, cover always precedes TOC
     :return: True when success
     """
-    rtn = await IMGKit.create(filename,
+    rtn = await AsyncIMGKit.create(filename,
                  'file',
                  options=options,
                  toc=toc,
@@ -85,7 +85,7 @@ async def from_string(string,
     :param cover_first: (optional) if True, cover always precedes TOC
     :return: True when success
     """
-    rtn = await IMGKit.create(string, 'string', options=options, toc=toc, cover=cover, css=css,
+    rtn = await AsyncIMGKit.create(string, 'string', options=options, toc=toc, cover=cover, css=css,
                  config=config, cover_first=cover_first)
     return await rtn.to_img(output_path)
 

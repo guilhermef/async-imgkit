@@ -5,24 +5,15 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/aa1f67f04ff24bb080b7f8c8a9b7b8b1)](https://www.codacy.com/app/jarrekk/imgkit?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jarrekk/imgkit&amp;utm_campaign=Badge_Grade)
 [![PyPI version](https://badge.fury.io/py/imgkit.svg)](https://badge.fury.io/py/imgkit)
 
-```
-  _____   __  __    _____   _  __  _   _
- |_   _| |  \/  |  / ____| | |/ / (_) | |
-   | |   | \  / | | |  __  | ' /   _  | |_
-   | |   | |\/| | | | |_ | |  <   | | | __|
-  _| |_  | |  | | | |__| | | . \  | | | |_
- |_____| |_|  |_|  \_____| |_|\_\ |_|  \__|
 
-```
-
-Python 2 and 3 wrapper for wkhtmltoimage utility to convert HTML to IMG using Webkit.
+Python 3 async wrapper for [IMGKIT](https://github.com/jarrekk/imgkit).
 
 ## Installation
 
-1. Install imgkit:
+1. Install async-imgkit:
 
     ``` python
-    pip install imgkit
+    pip install async_imgkit
     ```
 
 2. Install wkhtmltopdf:
@@ -48,32 +39,32 @@ Python 2 and 3 wrapper for wkhtmltoimage utility to convert HTML to IMG using We
 Simple example:
 
 ``` python
-import imgkit
+import async_imgkit
 
-imgkit.from_url('http://google.com', 'out.jpg')
-imgkit.from_file('test.html', 'out.jpg')
-imgkit.from_string('Hello!', 'out.jpg')
+await async_imgkit.from_url('http://google.com', 'out.jpg')
+await async_imgkit.from_file('test.html', 'out.jpg')
+await async_imgkit.from_string('Hello!', 'out.jpg')
 ```
 
 You can pass a list with multiple URLs or files:
 
 ``` python
-imgkit.from_url(['google.com', 'yandex.ru', 'engadget.com'], 'out.jpg')
-imgkit.from_file(['file1.html', 'file2.html'], 'out.jpg')
+await async_imgkit.from_url(['google.com', 'yandex.ru', 'engadget.com'], 'out.jpg')
+await async_imgkit.from_file(['file1.html', 'file2.html'], 'out.jpg')
 ```
 
 Also you can pass an opened file:
 
 ``` python
 with open('file.html') as f:
-    imgkit.from_file(f, 'out.jpg')
+    await async_imgkit.from_file(f, 'out.jpg')
 ```
 
 If you wish to further process generated IMG, you can read it to a variable:
 
 ``` python
 # Use False instead of output path to save pdf to a variable
-img = imgkit.from_url('http://google.com', False)
+img = await async_imgkit.from_url('http://google.com', False)
 ```
 
 You can find all wkhtmltoimage options by type `wkhtmltoimage` command or visit this [Manual](http://madalgo.au.dk/~jakobt/wkhtmltoxdoc/wkhtmltoimage_0.10.0_rc2-doc.html). You can drop '--' in option name. If option without value, use *None, False* or *''* for dict value:. For repeatable options (incl. allow, cookie, custom-header, post, postfile, run-script, replace) you may use a list or a tuple. With option that need multiple values (e.g. --custom-header Authorization secret) we may use a 2-tuple (see example below).
@@ -96,7 +87,7 @@ options = {
     'no-outline': None
 }
 
-imgkit.from_url('http://google.com', 'out.png', options=options)
+await async_imgkit.from_url('http://google.com', 'out.png', options=options)
 ```
 
 At some headless servers, perhaps you need to install **xvfb**:
@@ -118,7 +109,7 @@ options = {
     'quiet': ''
     }
 
-imgkit.from_url('google.com', 'out.jpg', options=options)
+await async_imgkit.from_url('google.com', 'out.jpg', options=options)
 ```
 
 Due to wkhtmltoimage command syntax, **TOC** and **Cover** options must be specified separately. If you need cover before TOC, use `cover_first` option:
@@ -130,8 +121,8 @@ toc = {
 
 cover = 'cover.html'
 
-imgkit.from_file('file.html', options=options, toc=toc, cover=cover)
-imgkit.from_file('file.html', options=options, toc=toc, cover=cover, cover_first=True)
+await async_imgkit.from_file('file.html', options=options, toc=toc, cover=cover)
+await async_imgkit.from_file('file.html', options=options, toc=toc, cover=cover, cover_first=True)
 ```
 
 You can specify external CSS files when converting files or strings using *css* option.
@@ -139,11 +130,11 @@ You can specify external CSS files when converting files or strings using *css* 
 ``` python
 # Single CSS file
 css = 'example.css'
-imgkit.from_file('file.html', options=options, css=css)
+await async_imgkit.from_file('file.html', options=options, css=css)
 
 # Multiple CSS files
 css = ['example.css', 'example2.css']
-imgkit.from_file('file.html', options=options, css=css)
+await async_imgkit.from_file('file.html', options=options, css=css)
 ```
 
 You can also pass any options through meta tags in your HTML:
@@ -160,7 +151,7 @@ body = """
   </html>
 """
 
-imgkit.from_string(body, 'out.png')
+await async_imgkit.from_string(body, 'out.png')
 ```
 
 ## Configuration
@@ -191,3 +182,4 @@ imgkit.from_string(html_string, output_file, config=config)
 ## Credit
 
 [python PDFKit](https://github.com/JazzCore/python-pdfkit)
+[python IMGKit](https://github.com/jarrekk/imgkit)

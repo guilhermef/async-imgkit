@@ -3,7 +3,7 @@ from distutils.core import setup
 from setuptools.command.test import test
 import os
 import sys
-import imgkit
+import async_imgkit
 
 
 class PyTest(test):
@@ -27,34 +27,36 @@ def long_description():
         long_desc += '\n' + pypandoc.convert_file('AUTHORS.md', 'rst')
     except Exception as e:
         print(e)
-        long_desc = imgkit.__doc__.strip()
+        long_desc = async_imgkit.__doc__.strip()
     return long_desc
 
 
 setup(
-    name='imgkit',
-    version=imgkit.__version__,
-    description=imgkit.__doc__.strip(),
+    name='async-imgkit',
+    version=async_imgkit.__version__,
+    description=async_imgkit.__doc__.strip(),
     long_description=long_description(),
-    download_url='https://github.com/jarrekk/imgkit',
-    license=imgkit.__license__,
+    download_url='https://github.com/guilhermef/async_imgkit',
+    license="MIT",
     tests_require=[
         'pytest',
         'aiounittest',
     ],
+    install_requires=[
+        "imgkit",
+    ],
     cmdclass={'test': PyTest},
-    packages=['imgkit'],
-    author=imgkit.__author__,
-    author_email=imgkit.__contact__,
-    url=imgkit.__homepage__,
+    packages=['async_imgkit'],
+    author="guilhermef",
+    author_email="guivideojob@gmail.com",
+    url="https://github.com/guilhermef/async_imgkit",
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Topic :: Text Processing',
         'Topic :: Text Processing :: General',
         'Topic :: Text Processing :: Markup',

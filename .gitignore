@@ -8,7 +8,7 @@
 .eggs
 build
 dist
-imgkit.egg-info
+async_imgkit.egg-info
 
 # Tests
 .tox
