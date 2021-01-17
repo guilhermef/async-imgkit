@@ -1,8 +1,8 @@
 # Async-IMGKit: Python library of HTML to IMG wrapper
 
 [![Build Status](https://www.travis-ci.com/guilhermef/async-imgkit.svg?branch=master)](https://www.travis-ci.com/guilhermef/async-imgkit)
-[![Code Coverage](https://codecov.io/github/guilhermef/async-imgkit/branch/master/graph/badge.svg)](https://codecov.io/github/jarrekk/imgkit/)
-[![PyPI version](https://badge.fury.io/py/imgkit.svg)](https://badge.fury.io/py/async-imgkit)
+[![Code Coverage](https://codecov.io/github/guilhermef/async-imgkit/branch/master/graph/badge.svg)](https://codecov.io/github/guilhermef/async-imgkit/)
+[![PyPI version](https://badge.fury.io/py/async-imgkit.svg)](https://badge.fury.io/py/async-imgkit)
 
 
 Python 3 async wrapper for [IMGKIT](https://github.com/jarrekk/imgkit).
