@@ -39,32 +39,32 @@ Python 3 async wrapper for [IMGKIT](https://github.com/jarrekk/imgkit).
 Simple example:
 
 ``` python
-import async_imgkit
+import async_imgkit.api as imgkit
 
-await async_imgkit.from_url('http://google.com', 'out.jpg')
-await async_imgkit.from_file('test.html', 'out.jpg')
-await async_imgkit.from_string('Hello!', 'out.jpg')
+await imgkit.from_url('http://google.com', 'out.jpg')
+await imgkit.from_file('test.html', 'out.jpg')
+await imgkit.from_string('Hello!', 'out.jpg')
 ```
 
 You can pass a list with multiple URLs or files:
 
 ``` python
-await async_imgkit.from_url(['google.com', 'yandex.ru', 'engadget.com'], 'out.jpg')
-await async_imgkit.from_file(['file1.html', 'file2.html'], 'out.jpg')
+await imgkit.from_url(['google.com', 'yandex.ru', 'engadget.com'], 'out.jpg')
+await imgkit.from_file(['file1.html', 'file2.html'], 'out.jpg')
 ```
 
 Also you can pass an opened file:
 
 ``` python
 with open('file.html') as f:
-    await async_imgkit.from_file(f, 'out.jpg')
+    await imgkit.from_file(f, 'out.jpg')
 ```
 
 If you wish to further process generated IMG, you can read it to a variable:
 
 ``` python
 # Use False instead of output path to save pdf to a variable
-img = await async_imgkit.from_url('http://google.com', False)
+img = await imgkit.from_url('http://google.com', False)
 ```
 
 You can find all wkhtmltoimage options by type `wkhtmltoimage` command or visit this [Manual](http://madalgo.au.dk/~jakobt/wkhtmltoxdoc/wkhtmltoimage_0.10.0_rc2-doc.html). You can drop '--' in option name. If option without value, use *None, False* or *''* for dict value:. For repeatable options (incl. allow, cookie, custom-header, post, postfile, run-script, replace) you may use a list or a tuple. With option that need multiple values (e.g. --custom-header Authorization secret) we may use a 2-tuple (see example below).
@@ -87,7 +87,7 @@ options = {
     'no-outline': None
 }
 
-await async_imgkit.from_url('http://google.com', 'out.png', options=options)
+await imgkit.from_url('http://google.com', 'out.png', options=options)
 ```
 
 At some headless servers, perhaps you need to install **xvfb**:
@@ -109,7 +109,7 @@ options = {
     'quiet': ''
     }
 
-await async_imgkit.from_url('google.com', 'out.jpg', options=options)
+await imgkit.from_url('google.com', 'out.jpg', options=options)
 ```
 
 Due to wkhtmltoimage command syntax, **TOC** and **Cover** options must be specified separately. If you need cover before TOC, use `cover_first` option:
@@ -121,8 +121,8 @@ toc = {
 
 cover = 'cover.html'
 
-await async_imgkit.from_file('file.html', options=options, toc=toc, cover=cover)
-await async_imgkit.from_file('file.html', options=options, toc=toc, cover=cover, cover_first=True)
+await imgkit.from_file('file.html', options=options, toc=toc, cover=cover)
+await imgkit.from_file('file.html', options=options, toc=toc, cover=cover, cover_first=True)
 ```
 
 You can specify external CSS files when converting files or strings using *css* option.
@@ -130,11 +130,11 @@ You can specify external CSS files when converting files or strings using *css* 
 ``` python
 # Single CSS file
 css = 'example.css'
-await async_imgkit.from_file('file.html', options=options, css=css)
+await imgkit.from_file('file.html', options=options, css=css)
 
 # Multiple CSS files
 css = ['example.css', 'example2.css']
-await async_imgkit.from_file('file.html', options=options, css=css)
+await imgkit.from_file('file.html', options=options, css=css)
 ```
 
 You can also pass any options through meta tags in your HTML:
@@ -151,7 +151,7 @@ body = """
   </html>
 """
 
-await async_imgkit.from_string(body, 'out.png')
+await imgkit.from_string(body, 'out.png')
 ```
 
 ## Configuration
