@@ -22,7 +22,7 @@ setup(
     version=async_imgkit.__version__,
     description=async_imgkit.__doc__.strip(),
     long_description=long_description(),
-    download_url='https://github.com/guilhermef/async_imgkit',
+    download_url='https://github.com/guilhermef/async-imgkit',
     license="MIT",
     install_requires=[
         "imgkit",
@@ -39,7 +39,7 @@ setup(
     packages=['async_imgkit'],
     author="guilhermef",
     author_email="guivideojob@gmail.com",
-    url="https://github.com/guilhermef/async_imgkit",
+    url="https://github.com/guilhermef/async-imgkit",
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
