@@ -23,7 +23,7 @@ class AsyncIMGKit(IMGKit):
                  css=None, config=None, cover_first=None):
         imgkit = cls()
         imgkit.source = Source(url_or_file, source_type)
-        imgkit.config = await Config.create() if not config else config
+        imgkit.config = Config() if not config else config
         try:
             imgkit.wkhtmltoimage = imgkit.config.wkhtmltoimage.decode('utf-8')
         except AttributeError:

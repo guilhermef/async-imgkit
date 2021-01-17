@@ -104,12 +104,12 @@ class TestIMGKitInitialization(aiounittest.AsyncTestCase):
         self.assertTrue(test_command[idx3 + 2] == 'cookie_value2')
 
     async def test_custom_config(self):
-        conf = await async_imgkit.api.config()
+        conf = async_imgkit.api.config()
         self.assertEqual('imgkit-', conf.meta_tag_prefix)
-        conf = await async_imgkit.api.config(meta_tag_prefix='prefix-')
+        conf = async_imgkit.api.config(meta_tag_prefix='prefix-')
         self.assertEqual('prefix-', conf.meta_tag_prefix)
         with self.assertRaises(IOError):
-            await async_imgkit.api.config(wkhtmltoimage='wrongpath')
+            async_imgkit.api.config(wkhtmltoimage='wrongpath')
 
 
 class TestIMGKitCommandGeneration(aiounittest.AsyncTestCase):

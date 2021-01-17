@@ -90,7 +90,7 @@ async def from_string(string,
     return await rtn.to_img(output_path)
 
 
-async def config(**kwargs):
+def config(**kwargs):
     """
     Constructs and returns a :class:`Config` with given options
 
@@ -98,4 +98,4 @@ async def config(**kwargs):
     :param meta_tag_prefix: the prefix for ``pdfkit`` specific meta tags
     """
 
-    return await Config.create(**kwargs)
+    return Config(**kwargs)

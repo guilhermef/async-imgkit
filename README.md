@@ -155,15 +155,15 @@ await imgkit.from_string(body, 'out.png')
 
 ## Configuration
 
-Each API call takes an optional config paramater. This should be an instance of `imgkit.config()` API call. It takes the config options as initial paramaters. The available options are:
+Each API call takes an optional config paramater. This should be an instance of `async_imgkit.api.config()` API call. It takes the config options as initial paramaters. The available options are:
 
-* `wkhtmltoimage` - the location of the `wkhtmltoimage` binary. By default `imgkit` will attempt to locate this using which` (on UNIX type systems) or where` (on Windows).
-* `meta_tag_prefix` - the prefix for `imgkit` specific meta tags - by default this is `imgkit-`
+* `wkhtmltoimage` - the location of the `wkhtmltoimage` binary. By default `async_imgkit` will attempt to locate this using which` (on UNIX type systems) or where` (on Windows).
+* `meta_tag_prefix` - the prefix for `async_imgkit` specific meta tags - by default this is `imgkit-`
 
 Example - for when `wkhtmltopdf` is not in `$PATH`:
 
 ``` python
-config = await imgkit.config(wkhtmltoimage='/opt/bin/wkhtmltoimage')
+config = imgkit.config(wkhtmltoimage='/opt/bin/wkhtmltoimage')
 await imgkit.from_string(html_string, output_file, config=config)
 ```
 
