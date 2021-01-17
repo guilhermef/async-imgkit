@@ -8,11 +8,7 @@ matrix:
     - python: 3.9
 
 before_script:
-  - sh ./travis/init.sh
-  - pip install codecov
+  - make setup
 
 script:
-  - nosetests --with-coverage --cover-package=imgkit --where test imgkit_test.py
-  - codecov
-
-before_deploy: sh ./travis/pandoc.sh
+  - make test
