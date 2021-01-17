@@ -1,36 +1,39 @@
 # -*- coding: utf-8 -*-
-import subprocess
+import asyncio
 import sys
 
 
 class Config(object):
-    def __init__(self, wkhtmltoimage='', meta_tag_prefix='imgkit-'):
-        self.meta_tag_prefix = meta_tag_prefix
+    @classmethod
+    async def create(cls, wkhtmltoimage='', meta_tag_prefix='imgkit-'):
+        config = cls()
+        config.meta_tag_prefix = meta_tag_prefix
 
-        self.wkhtmltoimage = wkhtmltoimage
+        config.wkhtmltoimage = wkhtmltoimage
 
-        self.xvfb = ''
+        config.xvfb = ''
 
-        if not self.wkhtmltoimage:
-            if sys.platform == 'win32':
-                self.wkhtmltoimage = subprocess.Popen(['where', 'wkhtmltoimage'],
-                                                      stdout=subprocess.PIPE).communicate()[0].strip()
-            else:
-                self.wkhtmltoimage = subprocess.Popen(['which', 'wkhtmltoimage'],
-                                                      stdout=subprocess.PIPE).communicate()[0].strip()
-        if not self.xvfb:
-            if sys.platform == 'win32':
-                self.xvfb = subprocess.Popen(['where', 'xvfb-run'],
-                                             stdout=subprocess.PIPE).communicate()[0].strip()
-            else:
-                self.xvfb = subprocess.Popen(['which', 'xvfb-run'],
-                                             stdout=subprocess.PIPE).communicate()[0].strip()
-
+        if not config.wkhtmltoimage:
+            config.wkhtmltoimage = await config.get_executable_path("wkhtmltoimage")
+        if not config.xvfb:
+            config.xvfb = await config.get_executable_path("xvfb-run")
         try:
-            with open(self.wkhtmltoimage):
+            with open(config.wkhtmltoimage):
                 pass
         except IOError:
             raise IOError('No wkhtmltoimage executable found: "{0}"\n'
                           'If this file exists please check that this process can '
                           'read it. Otherwise please install wkhtmltopdf - '
-                          'http://wkhtmltopdf.org\n'.format(self.wkhtmltoimage))
+                          'http://wkhtmltopdf.org\n'.format(config.wkhtmltoimage))
+        return config
+
+    async def get_executable_path(self, executable):
+        cmd = "which"
+        if sys.platform == 'win32':
+            cmd = "where"
+        proc = await asyncio.create_subprocess_shell(f"{cmd} {executable}", stdout=asyncio.subprocess.PIPE)
+
+        stdout, stderr = await proc.communicate()
+
+        return stdout.decode().strip()
+

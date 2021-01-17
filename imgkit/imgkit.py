@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import re
 import subprocess
 import sys
@@ -28,29 +29,32 @@ class IMGKit(object):
         def __str__(self):
             return self.message
 
-    def __init__(self, url_or_file, source_type, options=None, toc=None, cover=None,
+    @classmethod
+    async def create(cls, url_or_file, source_type, options=None, toc=None, cover=None,
                  css=None, config=None, cover_first=None):
-        self.source = Source(url_or_file, source_type)
-        self.config = Config() if not config else config
+        imgkit = cls()
+        imgkit.source = Source(url_or_file, source_type)
+        imgkit.config = await Config.create() if not config else config
         try:
-            self.wkhtmltoimage = self.config.wkhtmltoimage.decode('utf-8')
+            imgkit.wkhtmltoimage = imgkit.config.wkhtmltoimage.decode('utf-8')
         except AttributeError:
-            self.wkhtmltoimage = self.config.wkhtmltoimage
+            imgkit.wkhtmltoimage = imgkit.config.wkhtmltoimage
 
-        self.xvfb = self.config.xvfb
+        imgkit.xvfb = imgkit.config.xvfb
 
-        self.options = {}
-        if self.source.isString():
-            self.options.update(self._find_options_in_meta(url_or_file))
+        imgkit.options = {}
+        if imgkit.source.isString():
+            imgkit.options.update(imgkit._find_options_in_meta(url_or_file))
 
         if options:
-            self.options.update(options)
+            imgkit.options.update(options)
 
-        self.toc = toc if toc else {}
-        self.cover = cover
-        self.cover_first = cover_first
-        self.css = css
-        self.stylesheets = []
+        imgkit.toc = toc if toc else {}
+        imgkit.cover = cover
+        imgkit.cover_first = cover_first
+        imgkit.css = css
+        imgkit.stylesheets = []
+        return imgkit
 
     def _gegetate_args(self, options):
         """
@@ -206,10 +210,10 @@ class IMGKit(object):
 
         return found
 
-    def to_img(self, path=None):
-        args = self.command(path)
+    async def to_img(self, path=None):
+        args = " ".join(self.command(path))
 
-        result = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        result = await asyncio.create_subprocess_shell(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
 
         # If the source is a string then we will pipe it into wkhtmltoimage.
@@ -222,7 +226,7 @@ class IMGKit(object):
             string = self.source.source.read().encode('utf-8')
         else:
             string = None
-        stdout, stderr = result.communicate(input=string)
+        stdout, stderr = await result.communicate(input=string)
         stderr = stderr or stdout
         try:
             stderr = stderr.decode('utf-8')
@@ -259,9 +263,9 @@ class IMGKit(object):
                     if text == '':
                         raise IOError('Command failed: %s\n'
                                       'Check whhtmltoimage output without \'quiet\' '
-                                      'option' % ' '.join(args))
+                                      'option' % args)
                     return True
             except IOError as e:
                 raise IOError('Command failed: %s\n'
                               'Check whhtmltoimage output without \'quiet\' option\n'
-                              '%s ' % (' '.join(args)), e)
+                              '%s ' % (args), e)

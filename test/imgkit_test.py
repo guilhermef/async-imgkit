@@ -4,6 +4,9 @@ import io
 import sys
 import codecs
 import unittest
+import tempfile
+
+import aiounittest
 
 # Prepend ../ to PYTHONPATH so that we can import IMGKIT form there.
 TEST_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -12,71 +15,71 @@ sys.path.insert(0, os.path.realpath(os.path.join(TEST_ROOT, '..')))
 import imgkit
 
 
-class TestIMGKitInitialization(unittest.TestCase):
+class TestIMGKitInitialization(aiounittest.AsyncTestCase):
     """Test init"""
 
-    def test_html_source(self):
-        r = imgkit.IMGKit('<h1>Oh hai</h1>', 'string')
+    async def test_html_source(self):
+        r = await imgkit.IMGKit.create('<h1>Oh hai</h1>', 'string')
         self.assertTrue(r.source.isString())
 
-    def test_url_source(self):
-        r = imgkit.IMGKit('http://ya.ru', 'url')
+    async def test_url_source(self):
+        r = await imgkit.IMGKit.create('http://ya.ru', 'url')
         self.assertTrue(r.source.isUrl())
 
-    def test_file_source(self):
-        r = imgkit.IMGKit('fixtures/example.html', 'file')
+    async def test_file_source(self):
+        r = await imgkit.IMGKit.create('fixtures/example.html', 'file')
         self.assertTrue(r.source.isFile())
 
-    def test_file_object_source(self):
+    async def test_file_object_source(self):
         with open('fixtures/example.html') as fl:
-            r = imgkit.IMGKit(fl, 'file')
+            r = await imgkit.IMGKit.create(fl, 'file')
             self.assertTrue(r.source.isFileObj())
 
-    def test_file_source_with_path(self):
-        r = imgkit.IMGKit('test', 'string')
+    async def test_file_source_with_path(self):
+        r = await imgkit.IMGKit.create('test', 'string')
         with io.open('fixtures/example.css') as f:
             self.assertTrue(r.source.isFile(path=f))
         with codecs.open('fixtures/example.css', encoding='UTF-8') as f:
             self.assertTrue(r.source.isFile(path=f))
 
-    def test_options_parsing(self):
-        r = imgkit.IMGKit('html', 'string', options={'format': 'jpg'})
+    async def test_options_parsing(self):
+        r = await imgkit.IMGKit.create('html', 'string', options={'format': 'jpg'})
         test_command = r.command('test')
         idx = test_command.index('--format')  # Raise exception in case of not found
         self.assertTrue(test_command[idx + 1] == 'jpg')
 
-    def test_options_parsing_with_dashes(self):
-        r = imgkit.IMGKit('html', 'string', options={'--format': 'jpg'})
+    async def test_options_parsing_with_dashes(self):
+        r = await imgkit.IMGKit.create('html', 'string', options={'--format': 'jpg'})
 
         test_command = r.command('test')
         idx = test_command.index('--format')  # Raise exception in case of not found
         self.assertTrue(test_command[idx + 1] == 'jpg')
 
-    def test_options_parsing_with_tuple(self):
+    async def test_options_parsing_with_tuple(self):
         options = {
             '--custom-header': [
                 ('Accept-Encoding', 'gzip')
             ]
         }
-        r = imgkit.IMGKit('html', 'string', options=options)
+        r = await imgkit.IMGKit.create('html', 'string', options=options)
         command = r.command()
         idx1 = command.index('--custom-header')  # Raise exception in case of not found
         self.assertTrue(command[idx1 + 1] == 'Accept-Encoding')
         self.assertTrue(command[idx1 + 2] == 'gzip')
 
-    def test_options_parsing_with_tuple_no_dashes(self):
+    async def test_options_parsing_with_tuple_no_dashes(self):
         options = {
             'custom-header': [
                 ('Accept-Encoding', 'gzip')
             ]
         }
-        r = imgkit.IMGKit('html', 'string', options=options)
+        r = await imgkit.IMGKit.create('html', 'string', options=options)
         command = r.command()
         idx1 = command.index('--custom-header')  # Raise exception in case of not found
         self.assertTrue(command[idx1 + 1] == 'Accept-Encoding')
         self.assertTrue(command[idx1 + 2] == 'gzip')
 
-    def test_repeatable_options(self):
+    async def test_repeatable_options(self):
         roptions = {
             '--format': 'jpg',
             'cookies': [
@@ -85,7 +88,7 @@ class TestIMGKitInitialization(unittest.TestCase):
             ]
         }
 
-        r = imgkit.IMGKit('html', 'string', options=roptions)
+        r = await imgkit.IMGKit.create('html', 'string', options=roptions)
 
         test_command = r.command('test')
 
@@ -102,54 +105,54 @@ class TestIMGKitInitialization(unittest.TestCase):
         self.assertTrue(test_command[idx3 + 1] == 'test_cookie2')
         self.assertTrue(test_command[idx3 + 2] == 'cookie_value2')
 
-    def test_custom_config(self):
-        conf = imgkit.config()
+    async def test_custom_config(self):
+        conf = await imgkit.config()
         self.assertEqual('imgkit-', conf.meta_tag_prefix)
-        conf = imgkit.config(meta_tag_prefix='prefix-')
+        conf = await imgkit.config(meta_tag_prefix='prefix-')
         self.assertEqual('prefix-', conf.meta_tag_prefix)
         with self.assertRaises(IOError):
-            imgkit.config(wkhtmltoimage='wrongpath')
+            await imgkit.config(wkhtmltoimage='wrongpath')
 
 
-class TestIMGKitCommandGeneration(unittest.TestCase):
+class TestIMGKitCommandGeneration(aiounittest.AsyncTestCase):
     """Test command() method"""
 
-    def test_command_construction(self):
-        r = imgkit.IMGKit('html', 'string', options={'format': 'jpg', 'toc-l1-font-size': 12})
+    async def test_command_construction(self):
+        r = await imgkit.IMGKit.create('html', 'string', options={'format': 'jpg', 'toc-l1-font-size': 12})
         command = r.command()
         self.assertEqual(command[0], r.wkhtmltoimage)
         self.assertEqual(command[command.index('--format') + 1], 'jpg')
         self.assertEqual(command[command.index('--toc-l1-font-size') + 1], '12')
 
-    def test_lists_of_input_args(self):
+    async def test_lists_of_input_args(self):
         urls = ['http://ya.ru', 'http://google.com']
         paths = ['fixtures/example.html', 'fixtures/example.html']
-        r = imgkit.IMGKit(urls, 'url')
-        r2 = imgkit.IMGKit(paths, 'file')
+        r = await imgkit.IMGKit.create(urls, 'url')
+        r2 = await imgkit.IMGKit.create(paths, 'file')
         cmd = r.command()
         cmd2 = r2.command()
         self.assertEqual(cmd[-3:], ['http://ya.ru', 'http://google.com', '-'])
         self.assertEqual(cmd2[-3:], ['fixtures/example.html', 'fixtures/example.html', '-'])
 
-    def test_read_source_from_stdin(self):
-        r = imgkit.IMGKit('html', 'string')
+    async def test_read_source_from_stdin(self):
+        r = await imgkit.IMGKit.create('html', 'string')
         self.assertEqual(r.command()[-2:], ['-', '-'])
 
-    def test_url_in_command(self):
-        r = imgkit.IMGKit('http://ya.ru', 'url')
+    async def test_url_in_command(self):
+        r = await imgkit.IMGKit.create('http://ya.ru', 'url')
         self.assertEqual(r.command()[-2:], ['http://ya.ru', '-'])
 
-    def test_file_path_in_command(self):
+    async def test_file_path_in_command(self):
         path = 'fixtures/example.html'
-        r = imgkit.IMGKit(path, 'file')
+        r = await imgkit.IMGKit.create(path, 'file')
         self.assertEqual(r.command()[-2:], [path, '-'])
 
-    def test_output_path(self):
+    async def test_output_path(self):
         out = '/test/test2/out.jpg'
-        r = imgkit.IMGKit('html', 'string')
+        r = await imgkit.IMGKit.create('html', 'string')
         self.assertEqual(r.command(out)[-1:], ['/test/test2/out.jpg'])
 
-    def test_imgkit_meta_tags(self):
+    async def test_imgkit_meta_tags(self):
         body = """
         <html>
           <head>
@@ -158,12 +161,12 @@ class TestIMGKitCommandGeneration(unittest.TestCase):
           </head>
         """
 
-        r = imgkit.IMGKit(body, 'string')
+        r = await imgkit.IMGKit.create(body, 'string')
         command = r.command()
         self.assertEqual(command[command.index('--format') + 1], 'jpg')
         self.assertEqual(command[command.index('--orientation') + 1], 'Landscape')
 
-    def test_imgkit_meta_tags_in_bad_markup(self):
+    async def test_imgkit_meta_tags_in_bad_markup(self):
         body = """
         <html>
           <head>
@@ -174,12 +177,12 @@ class TestIMGKitCommandGeneration(unittest.TestCase):
         </html>
         """
 
-        r = imgkit.IMGKit(body, 'string')
+        r = await imgkit.IMGKit.create(body, 'string')
         command = r.command()
         self.assertEqual(command[command.index('--format') + 1], 'jpg')
         self.assertEqual(command[command.index('--orientation') + 1], 'Landscape')
 
-    def test_skip_nonimgkit_tags(self):
+    async def test_skip_nonimgkit_tags(self):
         body = """
         <html>
           <head>
@@ -190,16 +193,16 @@ class TestIMGKitCommandGeneration(unittest.TestCase):
         </html>
         """
 
-        r = imgkit.IMGKit(body, 'string')
+        r = await imgkit.IMGKit.create(body, 'string')
         command = r.command()
         self.assertEqual(command[command.index('--orientation') + 1], 'Landscape')
 
-    def test_toc_handling_without_options(self):
-        r = imgkit.IMGKit('hmtl', 'string', toc={'xsl-style-sheet': 'test.xsl'})
+    async def test_toc_handling_without_options(self):
+        r = await imgkit.IMGKit.create('hmtl', 'string', toc={'xsl-style-sheet': 'test.xsl'})
         self.assertEqual(r.command()[1], 'toc')
         self.assertEqual(r.command()[2], '--xsl-style-sheet')
 
-    def test_toc_with_options(self):
+    async def test_toc_with_options(self):
         options = {
             'format': 'jpg',
             'margin-top': '0.75in',
@@ -208,22 +211,22 @@ class TestIMGKitCommandGeneration(unittest.TestCase):
             'margin-left': '0.75in',
             'encoding': "UTF-8"
         }
-        r = imgkit.IMGKit('html', 'string', options=options, toc={'xsl-style-sheet': 'test.xsl'})
+        r = await imgkit.IMGKit.create('html', 'string', options=options, toc={'xsl-style-sheet': 'test.xsl'})
 
         command = r.command()
 
         self.assertEqual(command[1 + len(options) * 2], 'toc')
         self.assertEqual(command[1 + len(options) * 2 + 1], '--xsl-style-sheet')
 
-    def test_cover_without_options(self):
-        r = imgkit.IMGKit('html', 'string', cover='test.html')
+    async def test_cover_without_options(self):
+        r = await imgkit.IMGKit.create('html', 'string', cover='test.html')
 
         command = r.command()
 
         self.assertEqual(command[1], 'cover')
         self.assertEqual(command[2], 'test.html')
 
-    def test_cover_with_options(self):
+    async def test_cover_with_options(self):
         options = {
             'format': 'jpg',
             'margin-top': '0.75in',
@@ -232,14 +235,14 @@ class TestIMGKitCommandGeneration(unittest.TestCase):
             'margin-left': '0.75in',
             'encoding': "UTF-8"
         }
-        r = imgkit.IMGKit('html', 'string', options=options, cover='test.html')
+        r = await imgkit.IMGKit.create('html', 'string', options=options, cover='test.html')
 
         command = r.command()
 
         self.assertEqual(command[1 + len(options) * 2], 'cover')
         self.assertEqual(command[1 + len(options) * 2 + 1], 'test.html')
 
-    def test_cover_and_toc(self):
+    async def test_cover_and_toc(self):
         options = {
             'format': 'jpg',
             'margin-top': '0.75in',
@@ -248,11 +251,11 @@ class TestIMGKitCommandGeneration(unittest.TestCase):
             'margin-left': '0.75in',
             'encoding': "UTF-8"
         }
-        r = imgkit.IMGKit('html', 'string', options=options, toc={'xsl-style-sheet': 'test.xsl'}, cover='test.html')
+        r = await imgkit.IMGKit.create('html', 'string', options=options, toc={'xsl-style-sheet': 'test.xsl'}, cover='test.html')
         command = r.command()
         self.assertEqual(command[-7:], ['toc', '--xsl-style-sheet', 'test.xsl', 'cover', 'test.html', '-', '-'])
 
-    def test_cover_and_toc_cover_first(self):
+    async def test_cover_and_toc_cover_first(self):
         options = {
             'format': 'jpg',
             'margin-top': '0.75in',
@@ -261,70 +264,67 @@ class TestIMGKitCommandGeneration(unittest.TestCase):
             'margin-left': '0.75in',
             'encoding': "UTF-8"
         }
-        r = imgkit.IMGKit('html', 'string', options=options, toc={'xsl-style-sheet': 'test.xsl'}, cover='test.html',
+        r = await imgkit.IMGKit.create('html', 'string', options=options, toc={'xsl-style-sheet': 'test.xsl'}, cover='test.html',
                           cover_first=True)
         command = r.command()
         self.assertEqual(command[-7:], ['cover', 'test.html', 'toc', '--xsl-style-sheet', 'test.xsl', '-', '-'])
 
-    def test_outline_options(self):
+    async def test_outline_options(self):
         options = {
             'outline': None,
             'outline-depth': 1
         }
 
-        r = imgkit.IMGKit('ya.ru', 'url', options=options)
+        r = await imgkit.IMGKit.create('ya.ru', 'url', options=options)
         cmd = r.command()
         # self.assertEqual(cmd[1:], ['--outline', '--outline-depth', '1', 'ya.ru', '-'])
         self.assertIn('--outline', cmd)
         self.assertEqual(cmd[cmd.index('--outline-depth') + 1], '1')
 
-    def test_filter_empty_and_none_values_in_opts(self):
+    async def test_filter_empty_and_none_values_in_opts(self):
         options = {
             'outline': '',
             'footer-line': None,
             'quiet': False
         }
 
-        r = imgkit.IMGKit('html', 'string', options=options)
+        r = await imgkit.IMGKit.create('html', 'string', options=options)
         cmd = r.command()
         self.assertEqual(len(cmd), 6)
 
 
-class TestIMGKitGeneration(unittest.TestCase):
+class TestIMGKitGeneration(aiounittest.AsyncTestCase):
     """Test to_img() method"""
 
     def setUp(self):
-        pass
+        self.file_path = tempfile.NamedTemporaryFile(suffix=".jpg").name
 
-    def tearDown(self):
-        if os.path.exists('out.jpg'):
-            os.remove('out.jpg')
-
-    def test_img_generation(self):
-        r = imgkit.IMGKit('html', 'string', options={'format': 'jpg'})
-        pic = r.to_img('out.jpg')
+    async def test_img_generation(self):
+        r = await imgkit.IMGKit.create('html', 'string', options={'format': 'jpg'})
+        pic = await r.to_img(self.file_path)
         self.assertTrue(pic)
 
-    def test_img_generation_xvfb(self):
-        r = imgkit.IMGKit('html', 'string', options={'format': 'jpg', 'xvfb': ''})
-        pic = r.to_img('out.jpg')
+    @unittest.skipUnless(sys.platform.startswith("linux"), "requires Linux")
+    async def test_img_generation_xvfb(self):
+        r = await imgkit.IMGKit.create('html', 'string', options={'format': 'jpg', 'xvfb': ''})
+        pic = await r.to_img(self.file_path)
         self.assertTrue(pic)
 
-    def test_raise_error_with_invalid_url(self):
-        r = imgkit.IMGKit('wrongurl', 'url')
+    async def test_raise_error_with_invalid_url(self):
+        r = await imgkit.IMGKit.create('wrongurl', 'url')
         with self.assertRaises(IOError):
-            r.to_img('out.jpg')
+            await r.to_img(self.file_path)
 
-    def test_raise_error_with_invalid_file_path(self):
+    async def test_raise_error_with_invalid_file_path(self):
         paths = ['frongpath.html', 'wrongpath2.html']
         with self.assertRaises(IOError):
-            imgkit.IMGKit('wrongpath.html', 'file')
+            await imgkit.IMGKit.create('wrongpath.html', 'file')
         with self.assertRaises(IOError):
-            imgkit.IMGKit(paths, 'file')
+            await imgkit.IMGKit.create(paths, 'file')
 
-    def test_stylesheet_adding_to_the_head(self):
+    async def test_stylesheet_adding_to_the_head(self):
         # TODO rewrite this part of pdfkit.py
-        r = imgkit.IMGKit('<html><head></head><body>Hai!</body></html>', 'string',
+        r = await imgkit.IMGKit.create('<html><head></head><body>Hai!</body></html>', 'string',
                           css='fixtures/example.css')
 
         with open('fixtures/example.css') as f:
@@ -333,8 +333,8 @@ class TestIMGKitGeneration(unittest.TestCase):
         r._prepend_css('fixtures/example.css')
         self.assertIn('<style>%s</style>' % css, r.source.to_s())
 
-    def test_stylesheet_adding_without_head_tag(self):
-        r = imgkit.IMGKit('<html><body>Hai!</body></html>', 'string',
+    async def test_stylesheet_adding_without_head_tag(self):
+        r = await imgkit.IMGKit.create('<html><body>Hai!</body></html>', 'string',
                           options={'quiet': None}, css='fixtures/example.css')
 
         with open('fixtures/example.css') as f:
@@ -343,10 +343,10 @@ class TestIMGKitGeneration(unittest.TestCase):
         r._prepend_css('fixtures/example.css')
         self.assertIn('<style>%s</style><html>' % css, r.source.to_s())
 
-    def test_multiple_stylesheets_adding_to_the_head(self):
+    async def test_multiple_stylesheets_adding_to_the_head(self):
         # TODO rewrite this part of pdfkit.py
         css_files = ['fixtures/example.css', 'fixtures/example2.css']
-        r = imgkit.IMGKit('<html><head></head><body>Hai!</body></html>', 'string',
+        r = await imgkit.IMGKit.create('<html><head></head><body>Hai!</body></html>', 'string',
                           css=css_files)
 
         css = []
@@ -357,9 +357,9 @@ class TestIMGKitGeneration(unittest.TestCase):
         r._prepend_css(css_files)
         self.assertIn('<style>%s</style>' % "\n".join(css), r.source.to_s())
 
-    def test_multiple_stylesheet_adding_without_head_tag(self):
+    async def test_multiple_stylesheet_adding_without_head_tag(self):
         css_files = ['fixtures/example.css', 'fixtures/example2.css']
-        r = imgkit.IMGKit('<html><body>Hai!</body></html>', 'string',
+        r = await imgkit.IMGKit.create('<html><body>Hai!</body></html>', 'string',
                           options={'quiet': None}, css=css_files)
 
         css = []
@@ -370,41 +370,41 @@ class TestIMGKitGeneration(unittest.TestCase):
         r._prepend_css(css_files)
         self.assertIn('<style>%s</style><html>' % "\n".join(css), r.source.to_s())
 
-    def test_stylesheet_throw_error_when_url(self):
-        r = imgkit.IMGKit('http://ya.ru', 'url', css='fixtures/example.css')
+    async def test_stylesheet_throw_error_when_url(self):
+        r = await imgkit.IMGKit.create('http://ya.ru', 'url', css='fixtures/example.css')
 
         with self.assertRaises(r.SourceError):
-            r.to_img()
+            await r.to_img()
 
-    def test_stylesheet_adding_to_file_with_option(self):
+    async def test_stylesheet_adding_to_file_with_option(self):
         css = 'fixtures/example.css'
-        r = imgkit.IMGKit('fixtures/example.html', 'file', css=css)
+        r = await imgkit.IMGKit.create('fixtures/example.html', 'file', css=css)
         self.assertEqual(r.css, css)
         r._prepend_css(css)
         self.assertIn('font-size', r.source.to_s())
 
-    def test_wkhtmltoimage_error_handling(self):
-        r = imgkit.IMGKit('clearlywrongurl.asdf', 'url')
+    async def test_wkhtmltoimage_error_handling(self):
+        r = await imgkit.IMGKit.create('clearlywrongurl.asdf', 'url')
         with self.assertRaises(IOError):
-            r.to_img()
+            await r.to_img()
 
-    def test_pdf_generation_from_file_like(self):
+    async def test_pdf_generation_from_file_like(self):
         with open('fixtures/example.html', 'r') as f:
-            r = imgkit.IMGKit(f, 'file')
-            output = r.to_img()
+            r = await imgkit.IMGKit.create(f, 'file')
+            output = await r.to_img()
         self.assertEqual(output[:4], b'\xff\xd8\xff\xe0')  # TODO img
 
-    def test_raise_error_with_wrong_css_path(self):
+    async def test_raise_error_with_wrong_css_path(self):
         css = 'fixtures/wrongpath.css'
-        r = imgkit.IMGKit('fixtures/example.html', 'file', css=css)
+        r = await imgkit.IMGKit.create('fixtures/example.html', 'file', css=css)
         with self.assertRaises(IOError):
-            r.to_img()
+            await r.to_img()
 
-    def test_raise_error_if_bad_wkhtmltoimage_option(self):
-        r = imgkit.IMGKit('<html><body>Hai!</body></html>', 'string',
+    async def test_raise_error_if_bad_wkhtmltoimage_option(self):
+        r = await imgkit.IMGKit.create('<html><body>Hai!</body></html>', 'string',
                           options={'bad-option': None})
         with self.assertRaises(IOError) as cm:
-            r.to_img()
+            await r.to_img()
 
         raised_exception = cm.exception
         self.assertRegexpMatches(str(raised_exception),
@@ -412,19 +412,22 @@ class TestIMGKitGeneration(unittest.TestCase):
                                  '--bad-option\r?\n')
 
 
-class TestIMGKitAPI(unittest.TestCase):
+class TestIMGKitAPI(aiounittest.AsyncTestCase):
     """Test API"""
 
-    def test_from_string(self):
-        pic = imgkit.from_string('hello imgkit!', 'out.jpg')
+    def setUp(self):
+        self.file_path = tempfile.NamedTemporaryFile(suffix=".jpg").name
+
+    async def test_from_string(self):
+        pic = await imgkit.from_string('hello imgkit!', self.file_path)
         self.assertTrue(pic)
 
-    def test_from_url(self):
-        pic = imgkit.from_url('https://github.com', 'out.jpg')
+    async def test_from_url(self):
+        pic = await imgkit.from_url('https://github.com', self.file_path)
         self.assertTrue(pic)
 
-    def test_from_file(self):
-        pic = imgkit.from_file('fixtures/example.html', 'out.jpg')
+    async def test_from_file(self):
+        pic = await imgkit.from_file('fixtures/example.html', self.file_path)
         self.assertTrue(pic)
 
 

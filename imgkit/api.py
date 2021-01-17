@@ -3,7 +3,7 @@ from .imgkit import IMGKit
 from .config import Config
 
 
-def from_url(url,
+async def from_url(url,
              output_path,
              options=None,
              toc=None,
@@ -23,16 +23,16 @@ def from_url(url,
     :param cover_first: (optional) if True, cover always precedes TOC
     :return: True when success
     """
-    rtn = IMGKit(url,
+    rtn = await IMGKit.create(url,
                  'url',
                  options=options,
                  toc=toc, cover=cover,
                  config=config,
                  cover_first=cover_first)
-    return rtn.to_img(output_path)
+    return await rtn.to_img(output_path)
 
 
-def from_file(filename,
+async def from_file(filename,
               output_path,
               options=None,
               toc=None,
@@ -53,7 +53,7 @@ def from_file(filename,
     :param cover_first: (optional) if True, cover always precedes TOC
     :return: True when success
     """
-    rtn = IMGKit(filename,
+    rtn = await IMGKit.create(filename,
                  'file',
                  options=options,
                  toc=toc,
@@ -61,10 +61,10 @@ def from_file(filename,
                  css=css,
                  config=config,
                  cover_first=cover_first)
-    return rtn.to_img(output_path)
+    return await rtn.to_img(output_path)
 
 
-def from_string(string,
+async def from_string(string,
                 output_path,
                 options=None,
                 toc=None,
@@ -85,12 +85,12 @@ def from_string(string,
     :param cover_first: (optional) if True, cover always precedes TOC
     :return: True when success
     """
-    rtn = IMGKit(string, 'string', options=options, toc=toc, cover=cover, css=css,
+    rtn = await IMGKit.create(string, 'string', options=options, toc=toc, cover=cover, css=css,
                  config=config, cover_first=cover_first)
-    return rtn.to_img(output_path)
+    return await rtn.to_img(output_path)
 
 
-def config(**kwargs):
+async def config(**kwargs):
     """
     Constructs and returns a :class:`Config` with given options
 
@@ -98,4 +98,4 @@ def config(**kwargs):
     :param meta_tag_prefix: the prefix for ``pdfkit`` specific meta tags
     """
 
-    return Config(**kwargs)
+    return await Config.create(**kwargs)

@@ -38,7 +38,10 @@ setup(
     long_description=long_description(),
     download_url='https://github.com/jarrekk/imgkit',
     license=imgkit.__license__,
-    tests_require=['pytest'],
+    tests_require=[
+        'pytest',
+        'aiounittest',
+    ],
     cmdclass={'test': PyTest},
     packages=['imgkit'],
     author=imgkit.__author__,
