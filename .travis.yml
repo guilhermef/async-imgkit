@@ -14,7 +14,7 @@ addons:
     - xvfb
     - pandoc
 
-before_script:
+install:
   - make setup
 
 script:
