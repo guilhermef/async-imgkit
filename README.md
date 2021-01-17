@@ -13,7 +13,7 @@ Python 3 async wrapper for [IMGKIT](https://github.com/jarrekk/imgkit).
 1. Install async-imgkit:
 
     ``` python
-    pip install async_imgkit
+    pip install async-imgkit
     ```
 
 2. Install wkhtmltopdf:
