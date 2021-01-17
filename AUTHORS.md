@@ -1,6 +1,7 @@
 ## Async-IMGKit author
 
 * **guilhermef** <https://github.com/guilhermef>
+
 ## IMGKit author
 
 * **jarrekk** <https://github.com/jarrekk>

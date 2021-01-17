@@ -163,8 +163,8 @@ Each API call takes an optional config paramater. This should be an instance of 
 Example - for when `wkhtmltopdf` is not in `$PATH`:
 
 ``` python
-config = imgkit.config(wkhtmltoimage='/opt/bin/wkhtmltoimage')
-imgkit.from_string(html_string, output_file, config=config)
+config = await imgkit.config(wkhtmltoimage='/opt/bin/wkhtmltoimage')
+await imgkit.from_string(html_string, output_file, config=config)
 ```
 
 
